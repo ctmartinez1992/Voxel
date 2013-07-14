@@ -34,10 +34,9 @@ int Block::load(GLfloat* data,
 		py -= 1 - _mass;
 	}
 
-	glm::vec3 color = randomColor();
-	float cx = color.x;
-	float cy = color.y;
-	float cz = color.z;
+	float cx = _color.x;
+	float cy = _color.y;
+	float cz = _color.z;
 
 	int arrayPosition = 0;
 
@@ -127,13 +126,11 @@ glm::vec3 Block::randomColor() {
 	switch(_material) {
 		//73411E
 		case BlockMaterial::Dirt:
-			//return MyMath::randomColor(115.0, 65.0, 30.0, 2, 2, 2);
-			return MyMath::randomColor(115.0, 65.0, 30.0, 0, 0, 0);
+			return MyMath::randomColor(115.0, 65.0, 30.0, 2, 2, 2);
 		
 		//808080
 		case BlockMaterial::Stone:
-			//return MyMath::randomColor(128.0, 128.0, 128.0, 3);
-			return MyMath::randomColor(128.0, 128.0, 128.0, 0);
+			return MyMath::randomColor(128.0, 128.0, 128.0, 3);
 
 		//0505FA
 		case BlockMaterial::Water:
@@ -154,6 +151,7 @@ glm::vec3 Block::getPosition() const {
 
 void Block::setMaterial(BlockMaterial material) {
 	_material = material;
+	_color = randomColor();
 }
 
 BlockMaterial Block::getMaterial() const {

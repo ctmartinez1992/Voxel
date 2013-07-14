@@ -9,8 +9,8 @@ const float	Chunk::MinFlow = 0.0001;
 Chunk::Chunk(Program* program, glm::vec3 position) : _vbo(0), _vao(0), _wvbo(0), _wvao(0), _position(position), _loaded(false), _generated(false),
 				 _chunkTotalSize(CHUNK_SIZE*CHUNK_SIZE*CHUNK_SIZE*CHUNK_SIZE),	//Amount of blocks in a chunk
 				 _renderBlockSize(6*2*3),										//6 faces * 2 triangles per face * 3 points for each triangle
-				 _renderSize(0),												//All the triangles that are going to be rendered
-				 _renderWaterSize(0),												//All the triangles that are going to be rendered
+				 _renderSize(0),												//All the block triangles that are going to be rendered
+				 _renderWaterSize(0),											//All the water triangles that are going to be rendered
 				 _vboQuadSize((3+3+3)*2*3),										//The amount of points in a quad * (3 GLfloats for position + 3 GLfloats for color + 3 GLfloats for normals)
 				 _vboBlockSize((3+3+3)*_renderBlockSize),						//The amount of points in a block * (3 GLfloats for position + 3 GLfloats for colo + 3 GLfloats for normalsr)
 				 _vboSize((sizeof(GLfloat)*_vboBlockSize)*_chunkTotalSize)		//vbo of a block * the size of a GLfloat * the amount of blocks in a chunk
@@ -29,6 +29,11 @@ Chunk::Chunk(Program* program, glm::vec3 position) : _vbo(0), _vao(0), _wvbo(0),
 	}
 
 	start = std::chrono::steady_clock::now();
+	
+	glGenVertexArrays(1, &_vao);
+    glGenBuffers(1, &_vbo);
+	glGenVertexArrays(1, &_wvao);
+    glGenBuffers(1, &_wvbo);
 }
 
 Chunk::~Chunk() {
@@ -42,9 +47,7 @@ Chunk::~Chunk() {
 }
 
 void Chunk::buildChunk() {
-	glGenVertexArrays(1, &_vao);
     glBindVertexArray(_vao);
-    glGenBuffers(1, &_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 	
 	GLfloat* data = new GLfloat[_vboBlockSize];
@@ -121,6 +124,7 @@ void Chunk::buildChunk() {
     glEnableVertexAttribArray(_program->attrib("vertNormal"));
     glVertexAttribPointer(_program->attrib("vertNormal"), 3, GL_FLOAT, GL_FALSE, 9*sizeof(GLfloat), (const GLvoid*)(6 * sizeof(GLfloat)));
     glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	delete[] data;
 	delete[] vertexData;
@@ -129,9 +133,7 @@ void Chunk::buildChunk() {
 }
 
 void Chunk::buildWater() {
-	glGenVertexArrays(1, &_wvao);
     glBindVertexArray(_wvao);
-    glGenBuffers(1, &_wvbo);
     glBindBuffer(GL_ARRAY_BUFFER, _wvbo);
 	
 	GLfloat* data = new GLfloat[_vboBlockSize];
@@ -154,7 +156,8 @@ void Chunk::buildWater() {
 		vertexDataSize += currentBlockVertexDataSize * 4;
 	}
 
-	glBufferData(GL_ARRAY_BUFFER, vertexDataSize, vertexData, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertexDataSize, NULL, GL_DYNAMIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, vertexDataSize, vertexData);
 	glEnableVertexAttribArray(_program->attrib("vert"));
     glVertexAttribPointer(_program->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 9*sizeof(GLfloat), NULL);
     glEnableVertexAttribArray(_program->attrib("vertColor"));
@@ -162,6 +165,7 @@ void Chunk::buildWater() {
     glEnableVertexAttribArray(_program->attrib("vertNormal"));
     glVertexAttribPointer(_program->attrib("vertNormal"), 3, GL_FLOAT, GL_FALSE, 9*sizeof(GLfloat), (const GLvoid*)(6 * sizeof(GLfloat)));
     glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	delete[] data;
 	delete[] vertexData;
@@ -307,6 +311,9 @@ void Chunk::updateWater() {
 					_blocks[x][y][z].setMaterial(BlockMaterial::Water);
 					_blocks[x][y][z].setActive(true);
 					_waterList.push_back(&_blocks[x][y][z]);
+					
+					std::sort(_waterList.begin(), _waterList.end());
+					_waterList.erase(std::unique(_waterList.begin(), _waterList.end()), _waterList.end());
 				}
 
 				_blocks[x][y][z].setMass(_blocks[x][y][z].getNewMass());
@@ -331,11 +338,10 @@ void Chunk::update() {
 	std::chrono::steady_clock::duration time_span = start - end;
 	double nseconds = double(time_span.count()) * std::chrono::steady_clock::period::num / std::chrono::steady_clock::period::den;
 
-	if (InputHandler::getInstance()->keyPressed(InputHandler::getInstance()->y)) {
-		if ((nseconds*-1) > 0.05) {
-			start = std::chrono::steady_clock::now();
-			updateWater();
-		}
+	if ((nseconds*-1) > 0.05) {
+		start = std::chrono::steady_clock::now();
+		updateWater();
+		std::cout << _waterList.size() << "-";
 	}
 }
 

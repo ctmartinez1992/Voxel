@@ -22,7 +22,7 @@ void FPS::update(double currentTime) {
 		_frameCount = 0;
 		_initTime = currentTime;
 		_counter++;
-		std::cout << _fps << std::endl;
+		std::cout << std::endl << _fps << std::endl;
 	} else {
 		_frameCount++;
 	}

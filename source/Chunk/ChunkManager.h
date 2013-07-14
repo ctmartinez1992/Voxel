@@ -11,8 +11,12 @@
 class ChunkManager {
 	/*************** Variables ***************/
 public:
+
 	//Amount of chucks that are loaded each frame.
 	static const int				ASYNC_NUM_CHUNKS_PER_FRAME = 1;
+
+	//Singleton.
+	static ChunkManager*			_instance;
 
 	//List with all the chuncks ever.
 	std::vector<Chunk*>				_chunkList;
@@ -37,6 +41,9 @@ public:
 	ChunkManager();
 	~ChunkManager();
 	
+	//Get a pointer to the Chunk Generator from anywhere (lazy but safe).
+	static ChunkManager*			getInstance();
+	
 	//Pushes the chunk into the lists.
 	void							pushChunk(Chunk* chunk);
 
@@ -51,6 +58,8 @@ public:
 
 	//Updates the render list.
 	void							updateRenderList();
+
+	Chunk*							getChunkGivenWorldPosition(float x, float y, float z);
 };
 
 #endif

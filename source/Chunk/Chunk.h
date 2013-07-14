@@ -12,6 +12,9 @@
 
 #include <algorithm>
 #include <chrono>
+#include <vector>
+
+class ChunkManager;
 
 class Chunk {
 	/*************** Variables ***************/
@@ -43,6 +46,8 @@ private:
 
 	//Flag that checks if the chunk was generated or not.
 	bool						_generated;
+
+	ChunkManager*				_chunkManager;
 	
 	std::chrono::steady_clock::time_point start;
 	std::chrono::steady_clock::time_point end;

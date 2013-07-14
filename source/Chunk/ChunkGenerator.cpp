@@ -78,6 +78,15 @@ void ChunkGenerator::generateChunk(Chunk* chunk) {
 					chunk->_blocks[x][y][z].setActive(true);
 					chunk->_waterList.push_back(&chunk->_blocks[x][y][z]);
 				}
+
+				if (x==6 && y==10 && z==6) {
+					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Water);
+					chunk->_blocks[x][y][z].setType(BlockType::Liquid);
+					chunk->_blocks[x][y][z].setMass(1);
+					chunk->_blocks[x][y][z].setNewMass(1);
+					chunk->_blocks[x][y][z].setActive(true);
+					chunk->_waterList.push_back(&chunk->_blocks[x][y][z]);
+				}
 				
 				if (x==6 && y==4 && z==6) {
 					chunk->_blocks[x][y][z].setActive(true);

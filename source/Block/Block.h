@@ -24,6 +24,7 @@ class Block {
 	/*************** Variables ***************/
 private:
 	glm::vec3					_position;
+	glm::vec3					_color;
 	BlockMaterial				_material;
 	BlockType					_type;
 	bool						_active;

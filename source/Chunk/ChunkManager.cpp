@@ -1,5 +1,7 @@
 #include "ChunkManager.h"
 
+ChunkManager* ChunkManager::_instance = 0;
+
 ChunkManager::ChunkManager() {
 	_generator = new ChunkGenerator();
 }
@@ -18,6 +20,15 @@ ChunkManager::~ChunkManager() {
 	_chunkRenderList.~vector<Chunk*>();
 
 	delete _generator;
+
+	_instance = 0;
+}
+
+ChunkManager* ChunkManager::getInstance() {
+   if (!_instance) {
+      _instance = new ChunkManager;
+   }
+   return _instance;
 }
 
 void ChunkManager::pushChunk(Chunk* chunk) {
@@ -74,5 +85,13 @@ void ChunkManager::updateRenderList() {
         if(chunk->isLoaded() && chunk->isGenerated()) {
 			chunk->update();
         }
+    }
+}
+
+Chunk* ChunkManager::getChunkGivenWorldPosition(float x, float y, float z) {
+	std::vector<Chunk*>::iterator iterator;   
+    for(iterator = _chunkRenderList.begin(); iterator != _chunkRenderList.end(); iterator++) {
+		Chunk* chunk = *iterator;
+		return chunk;
     }
 }
