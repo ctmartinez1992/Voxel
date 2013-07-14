@@ -8,6 +8,10 @@
 
 #include "../Block/Block.h"
 #include "../../OGLRender/Program.h"
+#include "../IO/InputHandler.h"
+
+#include <algorithm>
+#include <chrono>
 
 class Chunk {
 	/*************** Variables ***************/
@@ -16,10 +20,17 @@ private:
 	GLuint						_vao;
 	GLuint						_vbo;
 
+	//The vertexes used to render the water.
+	GLuint						_wvao;
+	GLuint						_wvbo;
+
 	//Some size metrics, check the constructor for explanation.
 	int							_chunkTotalSize;
 	int							_renderBlockSize;
+
 	int							_renderSize;
+	int							_renderWaterSize;
+
 	int							_vboQuadSize;
 	int							_vboBlockSize;
 	int							_vboSize;
@@ -32,25 +43,34 @@ private:
 
 	//Flag that checks if the chunk was generated or not.
 	bool						_generated;
-
+	
+	std::chrono::steady_clock::time_point start;
+	std::chrono::steady_clock::time_point end;
+	
 public:
 	//The size of a chunk.
 	static const int			CHUNK_SIZE = 16;
 	
+	//Max units of water moved out of one block to another, per timestep.
+	static const float			MaxSpeed;
+	
 	//The normal, un-pressurized mass of a full water cell.
-	const float					MaxMass = 1.0;
+	static const float			MaxMass;
+	
+	//Ignore cells that are almost dry
+	static const float			MinMass;
 
 	//How much excess water a cell can store, compared to the cell above it.
-	const float					MaxCompress = 0.02;
-
-	//Ignore cells that are almost dry
-	const float					MinMass = 0.0001;
+	static const float			MaxCompress;
 
 	//Smooth the Flow.
-	const float					MinFlow = 0.01;
+	static const float			MinFlow;
 
 	//CHUNK_SIZE per CHUNK_SIZE per CHUNK_SIZE of Blocks
 	Block***					_blocks;
+	
+	//Quick access to water in the chunk.
+	std::vector<Block*>			_waterList;
 
 	//Handles the OpenGL stuff so that we can render the chunk.
 	Program*					_program;
@@ -63,18 +83,21 @@ public:
 	Chunk(Program* _program, glm::vec3 position);
 	~Chunk();
 
-	//Updates the Chunk.
+	//Updates everything.
 	void						update();
 
 	//Updates only the water blocks.
 	void						updateWater();
 
-	//Renders the Chunk.
+	//Renders everything.
 	void						render();
 
 	//Builds the chunk (every single block) and puts them to the shaders.
 	void						buildChunk();
-	
+
+	//Builds the water and puts them to the shaders.
+	void						buildWater();
+
 	void						setPosition(const glm::vec3 position);
 	glm::vec3					getPosition() const;
 	void						setLoaded(const bool loaded);

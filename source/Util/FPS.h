@@ -2,6 +2,7 @@
 #define FPS_H
 
 #include <iostream>
+#include "MyMath.h"
 
 class FPS {
 	/*************** Variables ***************/
@@ -13,6 +14,7 @@ public:
 	double					_fps;
 	int						_frameCount;
 	float					_timeInterval;
+	int						_counter;
 
 	/*************** Methods ***************/
 public:

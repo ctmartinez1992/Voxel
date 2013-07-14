@@ -4,7 +4,7 @@ InputHandler* InputHandler::_instance = NULL;
 
 InputHandler::InputHandler() : 
 							mouseLeft(GLFW_MOUSE_BUTTON_LEFT), mouseRight(GLFW_MOUSE_BUTTON_RIGHT), mouseMiddle(GLFW_MOUSE_BUTTON_MIDDLE),
-							moveForward(1), moveBack(2), moveLeft(3), moveRight(4), moveUp(5), moveDown(6)
+							moveForward(1), moveBack(2), moveLeft(3), moveRight(4), moveUp(5), moveDown(6), y(7)
 {        
 	keys[InputHandler::moveForward] = 87;
 	keys[InputHandler::moveBack] = 83;
@@ -12,6 +12,7 @@ InputHandler::InputHandler() :
 	keys[InputHandler::moveRight] = 68;
 	keys[InputHandler::moveUp] = 81;
 	keys[InputHandler::moveDown] = 90;
+	keys[InputHandler::y] = 89;
 }
 
 InputHandler::~InputHandler() {

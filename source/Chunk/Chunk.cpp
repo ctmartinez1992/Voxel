@@ -1,9 +1,16 @@
 #include "Chunk.h"
 
-Chunk::Chunk(Program* program, glm::vec3 position) : _vbo(0), _vao(0), _position(position), _loaded(false), _generated(false),
+const float	Chunk::MaxSpeed = 1.0;
+const float	Chunk::MaxMass = 1.0;
+const float	Chunk::MinMass = 0.1;
+const float Chunk::MaxCompress = 0.001f;
+const float	Chunk::MinFlow = 0.0001;
+
+Chunk::Chunk(Program* program, glm::vec3 position) : _vbo(0), _vao(0), _wvbo(0), _wvao(0), _position(position), _loaded(false), _generated(false),
 				 _chunkTotalSize(CHUNK_SIZE*CHUNK_SIZE*CHUNK_SIZE*CHUNK_SIZE),	//Amount of blocks in a chunk
 				 _renderBlockSize(6*2*3),										//6 faces * 2 triangles per face * 3 points for each triangle
 				 _renderSize(0),												//All the triangles that are going to be rendered
+				 _renderWaterSize(0),												//All the triangles that are going to be rendered
 				 _vboQuadSize((3+3+3)*2*3),										//The amount of points in a quad * (3 GLfloats for position + 3 GLfloats for color + 3 GLfloats for normals)
 				 _vboBlockSize((3+3+3)*_renderBlockSize),						//The amount of points in a block * (3 GLfloats for position + 3 GLfloats for colo + 3 GLfloats for normalsr)
 				 _vboSize((sizeof(GLfloat)*_vboBlockSize)*_chunkTotalSize)		//vbo of a block * the size of a GLfloat * the amount of blocks in a chunk
@@ -20,6 +27,8 @@ Chunk::Chunk(Program* program, glm::vec3 position) : _vbo(0), _vao(0), _position
 			_blocks[i][j] = new Block[CHUNK_SIZE];
 		}
 	}
+
+	start = std::chrono::steady_clock::now();
 }
 
 Chunk::~Chunk() {
@@ -39,7 +48,7 @@ void Chunk::buildChunk() {
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 	
 	GLfloat* data = new GLfloat[_vboBlockSize];
-	GLfloat* vertexData = new GLfloat[_vboBlockSize*_chunkTotalSize];
+	GLfloat* vertexData = new GLfloat[_vboBlockSize * _chunkTotalSize];
 	Block* tmpBlock;
 	double vertexDataSize = 0;
 	int currentBlockVertexDataSize = 0;
@@ -49,6 +58,9 @@ void Chunk::buildChunk() {
 		for(int y = 0; y < CHUNK_SIZE; y++) {
 			for(int z = 0; z < CHUNK_SIZE; z++) {
 				tmpBlock = &_blocks[x][y][z];
+				if (tmpBlock->getType() == BlockType::Liquid || tmpBlock->getMaterial() == BlockMaterial::Water) {
+					continue;
+				}
 
 				if (!tmpBlock->isActive()) {
 					continue;
@@ -116,14 +128,53 @@ void Chunk::buildChunk() {
 	_loaded = true;
 }
 
+void Chunk::buildWater() {
+	glGenVertexArrays(1, &_wvao);
+    glBindVertexArray(_wvao);
+    glGenBuffers(1, &_wvbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _wvbo);
+	
+	GLfloat* data = new GLfloat[_vboBlockSize];
+	GLfloat* vertexData = new GLfloat[_vboBlockSize * _waterList.size()];
+	double vertexDataSize = 0;
+	int currentBlockVertexDataSize = 0;
+	int vertexDataCurrentPosition = 0;
+	
+	std::vector<Block*>::iterator iterator;
+    for(iterator = _waterList.begin(); iterator != _waterList.end(); iterator++) {
+		Block* block = *iterator;
+		
+		currentBlockVertexDataSize = block->load(data, true, true, true, true, true, true);
+		for(int i=vertexDataCurrentPosition, j=0; i<(vertexDataCurrentPosition+currentBlockVertexDataSize), j<currentBlockVertexDataSize; i++, j++) {
+			vertexData[i] = data[j];
+		}
+				
+		_renderWaterSize += (currentBlockVertexDataSize / 2) / 3;
+		vertexDataCurrentPosition += currentBlockVertexDataSize;
+		vertexDataSize += currentBlockVertexDataSize * 4;
+	}
+
+	glBufferData(GL_ARRAY_BUFFER, vertexDataSize, vertexData, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(_program->attrib("vert"));
+    glVertexAttribPointer(_program->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 9*sizeof(GLfloat), NULL);
+    glEnableVertexAttribArray(_program->attrib("vertColor"));
+    glVertexAttribPointer(_program->attrib("vertColor"), 3, GL_FLOAT, GL_TRUE, 9*sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(_program->attrib("vertNormal"));
+    glVertexAttribPointer(_program->attrib("vertNormal"), 3, GL_FLOAT, GL_FALSE, 9*sizeof(GLfloat), (const GLvoid*)(6 * sizeof(GLfloat)));
+    glBindVertexArray(0);
+
+	delete[] data;
+	delete[] vertexData;
+}
+
 void Chunk::updateWater() {
 	float flow = 0;
 	float remaining_mass;
    
 	//Calculate and apply flow for each block.
-	for (int x(1); x!=CHUNK_SIZE; ++x) {
-		for(int y(1); y!=CHUNK_SIZE; ++y) {
-			for(int z(1); z!=CHUNK_SIZE; ++z) {
+	for (int x(1); x!=CHUNK_SIZE-1; ++x) {
+		for(int y(1); y!=CHUNK_SIZE-1; ++y) {
+			for(int z(1); z!=CHUNK_SIZE-1; ++z) {
 				//Only for water (liquid).
 				if (_blocks[x][y][z].getType() == BlockType::Liquid && _blocks[x][y][z].getMaterial() == BlockMaterial::Water) {
 					Block* thisBlock = &_blocks[x][y][z];
@@ -136,111 +187,171 @@ void Chunk::updateWater() {
 					}
         
 					//The block below this one
-					if ((_blocks[x][y-1][z].getType() != BlockType::Solid)) {
-						flow = getStableState(remaining_mass + _blocks[x][y][z].getMass()) - _blocks[x][y][z].getMass();
+					if (_blocks[x][y-1][z].getType() != BlockType::Solid) {
+						flow = getStableState(remaining_mass + _blocks[x][y-1][z].getMass()) - _blocks[x][y-1][z].getMass();
 						if (flow > MinFlow) {
 							//Leads to smoother flow.
 							flow *= 0.5;
 						}
-						//TOU AQUI A FAZER O MIN NO MYMATH
-						flow = MyMath::constrain(flow, 0, min(MaxSpeed, remaining_mass));
-          
-         new_mass[x][y] -= flow;
-         new_mass[x][y-1] += flow;  
-         remaining_mass -= flow;
-       }
+
+						flow = MyMath::constrain(flow, 0.0, MyMath::min(MaxSpeed, remaining_mass));
+						thisBlock->setNewMass(thisBlock->getNewMass() - flow);
+						_blocks[x][y-1][z].setNewMass(_blocks[x][y-1][z].getNewMass() + flow);  
+						remaining_mass -= flow;
+					}
         
-       if ( remaining_mass <= 0 ) continue;
+					if ( remaining_mass <= 0 ) {
+						continue;
+					}
         
-       //Left
-       if ( blocks[x-1][y] != GROUND ){
-         //Equalize the amount of water in this block and it's neighbour
-         flow = (mass[x][y] - mass[x-1][y])/4;
-         if ( flow > MinFlow ){ flow *= 0.5; }
-         flow = constrain(flow, 0, remaining_mass);
-           
-         new_mass[x][y] -= flow;
-         new_mass[x-1][y] += flow;
-         remaining_mass -= flow;
-       }
+					//The block left of this one.
+					if (_blocks[x-1][y][z].getType() != BlockType::Solid && _blocks[x][y-1][z].getType() == BlockType::Solid) {
+						//Equalize the amount of water in this block and it's neighbour
+						flow = (thisBlock->getMass() - _blocks[x-1][y][z].getNewMass()) / 4;
+						if (flow > MinFlow) {
+							flow *= 0.5;
+						}
+
+						flow = MyMath::constrain(flow, 0.0, remaining_mass);
+						thisBlock->setNewMass(thisBlock->getNewMass() - flow);
+						_blocks[x-1][y][z].setNewMass(_blocks[x-1][y][z].getNewMass() + flow);  
+						remaining_mass -= flow;
+					}
         
-       if ( remaining_mass <= 0 ) continue;
+					if (remaining_mass <= 0) {
+						continue;
+					}
  
-       //Right
-       if ( blocks[x+1][y] != GROUND ){
-         //Equalize the amount of water in this block and it's neighbour
-         flow = (mass[x][y] - mass[x+1][y])/4;
-         if ( flow > MinFlow ){ flow *= 0.5; }
-         flow = constrain(flow, 0, remaining_mass);
-           
-         new_mass[x][y] -= flow;
-         new_mass[x+1][y] += flow;
-         remaining_mass -= flow;
-       }
+					//The block right of this one.
+					if (_blocks[x+1][y][z].getType() != BlockType::Solid && _blocks[x][y-1][z].getType() == BlockType::Solid) {
+						//Equalize the amount of water in this block and it's neighbour
+						flow = (thisBlock->getMass() - _blocks[x+1][y][z].getNewMass()) / 4;
+						if (flow > MinFlow) {
+							flow *= 0.5;
+						}
+						
+						flow = MyMath::constrain(flow, 0.0, remaining_mass);
+						thisBlock->setNewMass(thisBlock->getNewMass() - flow);
+						_blocks[x+1][y][z].setNewMass(_blocks[x+1][y][z].getNewMass() + flow);  
+						remaining_mass -= flow;
+					}
         
-       if ( remaining_mass <= 0 ) continue;
+					if ( remaining_mass <= 0 ) {
+						continue;
+					}
         
-       //Up. Only compressed water flows upwards.
-       if ( blocks[x][y+1] != GROUND ){
-         flow = remaining_mass - getStableState( remaining_mass + mass[x][y+1] );
-         if ( flow > MinFlow ){ flow *= 0.5; }
-         flow = constrain( flow, 0, min(MaxSpeed, remaining_mass) );
-          
-         new_mass[x][y] -= flow;
-         new_mass[x][y+1] += flow;  
-         remaining_mass -= flow;
-       }
+					//The block in front of this one.
+					if (_blocks[x][y][z-1].getType() != BlockType::Solid && _blocks[x][y-1][z].getType() == BlockType::Solid) {
+						//Equalize the amount of water in this block and it's neighbour
+						flow = (thisBlock->getMass() - _blocks[x][y][z-1].getNewMass()) / 4;
+						if (flow > MinFlow) {
+							flow *= 0.5;
+						}
+
+						flow = MyMath::constrain(flow, 0.0, remaining_mass);
+						thisBlock->setNewMass(thisBlock->getNewMass() - flow);
+						_blocks[x][y][z-1].setNewMass(_blocks[x][y][z-1].getNewMass() + flow);  
+						remaining_mass -= flow;
+					}
+        
+					if (remaining_mass <= 0) {
+						continue;
+					}
  
+					//The block behind of this one.
+					if (_blocks[x][y][z+1].getType() != BlockType::Solid && _blocks[x][y-1][z].getType() == BlockType::Solid) {
+						//Equalize the amount of water in this block and it's neighbour
+						flow = (thisBlock->getMass() - _blocks[x][y][z+1].getNewMass()) / 4;
+						if (flow > MinFlow) {
+							flow *= 0.5;
+						}
+						
+						flow = MyMath::constrain(flow, 0.0, remaining_mass);
+						thisBlock->setNewMass(thisBlock->getNewMass() - flow);
+						_blocks[x][y][z+1].setNewMass(_blocks[x][y][z+1].getNewMass() + flow);  
+						remaining_mass -= flow;
+					}
+        
+					if ( remaining_mass <= 0 ) {
+						continue;
+					}
+        
+					////The block above of this one, only compressed water flows upwards.
+					//if (_blocks[x][y+1][z].getType() != BlockType::Solid) {
+					//	flow = remaining_mass - getStableState(remaining_mass + _blocks[x][y+1][z].getMass());
+					//	if (flow > MinFlow) {
+					//		flow *= 0.5;
+					//	}
+
+					//	flow = MyMath::constrain(flow, 0.0, MyMath::min(MaxSpeed, remaining_mass));
+					//	thisBlock->setNewMass(thisBlock->getNewMass() - flow);
+					//	_blocks[x][y+1][z].setNewMass(_blocks[x][y+1][z].getNewMass() + flow);  
+					//	remaining_mass -= flow;
+					//}
 				} 
-     }
-  }
+			}
 		}
-   
-  //Copy the new mass values to the mass array
-  for (int x = 0; x < map_width + 2; x++){
-    for (int y = 0; y < map_height + 2; y++){
-      mass[x][y] = new_mass[x][y];
-    }
-  }
-   
-  for (int x = 1; x <= map_width; x++){
-     for(int y = 1; y <= map_height; y++){
-       //Skip ground blocks
-       if(blocks[x][y] == GROUND) continue;
-       //Flag/unflag water blocks
-       if (mass[x][y] > MinMass){
-         blocks[x][y] = WATER;
-       } else {
-         blocks[x][y] = AIR;
-       }
-     }
-  }
-   
-  //Remove any water that has left the map
-  for (int x =0; x < map_width+2; x++){
-    mass[x][0] = 0;
-    mass[x][map_height+1] = 0;
-  }
-  for (int y = 1; y < map_height+1; y++){
-    mass[0][y] = 0;
-    mass[map_width+1][y] = 0;
-  }
- 
+	}
+
+	//Copy the new mass values to the mass array
+	for (int x(0); x!=CHUNK_SIZE; ++x) {
+		for(int y(0); y!=CHUNK_SIZE; ++y) {
+			for(int z(0); z!=CHUNK_SIZE; ++z) {
+				if(_blocks[x][y][z].getType() == BlockType::Solid) {
+					continue;
+				}
+
+				//Flag/unflag water blocks
+				if (_blocks[x][y][z].getMass() > MinMass) {
+					_blocks[x][y][z].setType(BlockType::Liquid);
+					_blocks[x][y][z].setMaterial(BlockMaterial::Water);
+					_blocks[x][y][z].setActive(true);
+					_waterList.push_back(&_blocks[x][y][z]);
+				}
+
+				_blocks[x][y][z].setMass(_blocks[x][y][z].getNewMass());
+
+				if (_blocks[x][y][z].getMass() <= 0.0) {
+					_blocks[x][y][z].setType(BlockType::Air);
+					_blocks[x][y][z].setMaterial(BlockMaterial::Air);
+					_blocks[x][y][z].setActive(false);
+					_blocks[x][y][z].setMass(0.01);
+					_blocks[x][y][z].setNewMass(0.01);
+					_waterList.erase(std::remove(_waterList.begin(), _waterList.end(), &_blocks[x][y][z]), _waterList.end());
+				}
+			}
+		}
+	}
+
+	buildWater();
 }
 
 void Chunk::update() {
-	updateWater();
+	end = std::chrono::steady_clock::now();
+	std::chrono::steady_clock::duration time_span = start - end;
+	double nseconds = double(time_span.count()) * std::chrono::steady_clock::period::num / std::chrono::steady_clock::period::den;
+
+	if (InputHandler::getInstance()->keyPressed(InputHandler::getInstance()->y)) {
+		if ((nseconds*-1) > 0.05) {
+			start = std::chrono::steady_clock::now();
+			updateWater();
+		}
+	}
 }
 
 void Chunk::render() {
 	_program->setUniform("model", glm::mat4());
-
+	
     glBindVertexArray(_vao);
 		glDrawArrays(GL_TRIANGLES, 0, _renderSize);
     glBindVertexArray(0);
+
+    glBindVertexArray(_wvao);
+		glDrawArrays(GL_TRIANGLES, 0, _renderWaterSize);
+    glBindVertexArray(0);
 }
 
-float Chunk::getStableState (float totalMass) {
+float Chunk::getStableState(float totalMass) {
 	if (totalMass <= 1) {
 		return 1;
 	} else if (totalMass < (2 * MaxMass + MaxCompress)) {

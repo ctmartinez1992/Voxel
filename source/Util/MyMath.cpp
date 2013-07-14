@@ -11,7 +11,7 @@ glm::mat4 scale(GLfloat x, GLfloat y, GLfloat z) {
 int MyMath::constrain(int value, int min, int max) {
 	if (value < min) {
 		return min;
-	} else if (value > min) {
+	} else if (value > max) {
 		return max;
 	} else {
 		return value;
@@ -21,7 +21,7 @@ int MyMath::constrain(int value, int min, int max) {
 float MyMath::constrain(float value, float min, float max) {
 	if (value < min) {
 		return min;
-	} else if (value > min) {
+	} else if (value > max) {
 		return max;
 	} else {
 		return value;
@@ -36,6 +36,14 @@ int MyMath::floor(float value) {
 int MyMath::floor(double value) {
 	int i = (int) value;
 	return value >= (double) i ? i : i - 1;
+}
+
+int MyMath::min(int n1, int n2) {
+	return (n1 > n2) ? n1 : n2;
+}
+
+float MyMath::min(float n1, float n2) {
+	return (n1 > n2) ? n1 : n2;
 }
 
 glm::vec3 MyMath::randomColor(float r, float g, float b, int rR, int rG, int rB) {

@@ -24,6 +24,7 @@ public:
 	const int						moveRight;				//D
 	const int						moveUp;					//Q
 	const int						moveDown;				//Z
+	const int						y;						//Y
 
 	//A map with all they keys.
 	std::map<int, int>				keys;

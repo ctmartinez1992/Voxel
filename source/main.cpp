@@ -147,7 +147,7 @@ void AppMain() {
 
 		fps->update(glfwGetTime());
 
-        if(glfwGetKey(GLFW_KEY_ESC)) {
+		if(glfwGetKey(GLFW_KEY_ESC) || (fps->_fps < 5.0 && fps->_counter > 5)) {
             glfwCloseWindow();
 		}
 
