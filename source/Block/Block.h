@@ -65,4 +65,28 @@ public:
 	float						Block::getNewMass() const;
 };
 
+inline bool operator ==(const Block& lhs, const Block& rhs) {
+	return ((lhs.getPosition().x == rhs.getPosition().x) && (lhs.getPosition().y == rhs.getPosition().y) && (lhs.getPosition().z == rhs.getPosition().z));
+}
+
+inline bool operator !=(const Block& lhs, const Block& rhs) {
+	return !operator ==(lhs,rhs);
+}
+
+inline bool operator <(const Block& lhs, const Block& rhs) {
+	return (lhs.getPosition().y < rhs.getPosition().y);
+}
+
+inline bool operator >(const Block& lhs, const Block& rhs) {
+	return  operator< (rhs,lhs);
+}
+
+inline bool operator <=(const Block& lhs, const Block& rhs) {
+	return !operator> (lhs,rhs);
+}
+
+inline bool operator >=(const Block& lhs, const Block& rhs) {
+	return !operator< (lhs,rhs);
+}
+
 #endif

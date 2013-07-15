@@ -1,4 +1,5 @@
 #include "ChunkManager.h"
+#include "Chunk.h"
 
 ChunkManager* ChunkManager::_instance = 0;
 

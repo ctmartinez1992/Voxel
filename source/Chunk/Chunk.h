@@ -12,7 +12,7 @@
 
 #include <algorithm>
 #include <chrono>
-#include <vector>
+#include <list>
 
 class ChunkManager;
 
@@ -46,8 +46,6 @@ private:
 
 	//Flag that checks if the chunk was generated or not.
 	bool						_generated;
-
-	ChunkManager*				_chunkManager;
 	
 	std::chrono::steady_clock::time_point start;
 	std::chrono::steady_clock::time_point end;
@@ -75,17 +73,19 @@ public:
 	Block***					_blocks;
 	
 	//Quick access to water in the chunk.
-	std::vector<Block*>			_waterList;
+	std::list<Block*>			_waterList;
 
 	//Handles the OpenGL stuff so that we can render the chunk.
 	Program*					_program;
+
+	ChunkManager*				_chunkManager;
 
 	/*************** Methods ***************/
 private:
 	float						getStableState(float totalMass);
 
 public:
-	Chunk(Program* _program, glm::vec3 position);
+	Chunk(Program* _program, glm::vec3 position, ChunkManager* chunkManager);
 	~Chunk();
 
 	//Updates everything.

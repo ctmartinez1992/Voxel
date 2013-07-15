@@ -5,8 +5,9 @@
 #include <vector>
 #include <time.h>
 
-#include "Chunk.h"
 #include "ChunkGenerator.h"
+
+class Chunk;
 
 class ChunkManager {
 	/*************** Variables ***************/

@@ -79,7 +79,16 @@ void ChunkGenerator::generateChunk(Chunk* chunk) {
 					chunk->_waterList.push_back(&chunk->_blocks[x][y][z]);
 				}
 
-				if (x==6 && y==10 && z==6) {
+				if (x==9 && y==10 && z==8) {
+					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Water);
+					chunk->_blocks[x][y][z].setType(BlockType::Liquid);
+					chunk->_blocks[x][y][z].setMass(1);
+					chunk->_blocks[x][y][z].setNewMass(1);
+					chunk->_blocks[x][y][z].setActive(true);
+					chunk->_waterList.push_back(&chunk->_blocks[x][y][z]);
+				}
+
+				if (x==10 && y==10 && z==8) {
 					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Water);
 					chunk->_blocks[x][y][z].setType(BlockType::Liquid);
 					chunk->_blocks[x][y][z].setMass(1);
@@ -88,112 +97,15 @@ void ChunkGenerator::generateChunk(Chunk* chunk) {
 					chunk->_waterList.push_back(&chunk->_blocks[x][y][z]);
 				}
 				
-				if (x==6 && y==4 && z==6) {
+				if (x==8 && y==4 && z==8) {
 					chunk->_blocks[x][y][z].setActive(true);
 					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Dirt);
 					chunk->_blocks[x][y][z].setType(BlockType::Solid);
 					chunk->_blocks[x][y][z].setMass(0.0);
 					chunk->_blocks[x][y][z].setNewMass(0.0);
 				}
-				if (x==7 && y==4 && z==6) {
-					chunk->_blocks[x][y][z].setActive(true);
-					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Dirt);
-					chunk->_blocks[x][y][z].setType(BlockType::Solid);
-					chunk->_blocks[x][y][z].setMass(0.0);
-					chunk->_blocks[x][y][z].setNewMass(0.0);
-				}
-				if (x==8 && y==4 && z==6) {
-					chunk->_blocks[x][y][z].setActive(true);
-					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Dirt);
-					chunk->_blocks[x][y][z].setType(BlockType::Solid);
-					chunk->_blocks[x][y][z].setMass(0.0);
-					chunk->_blocks[x][y][z].setNewMass(0.0);
-				}
-				if (x==9 && y==4 && z==6) {
-					chunk->_blocks[x][y][z].setActive(true);
-					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Dirt);
-					chunk->_blocks[x][y][z].setType(BlockType::Solid);
-					chunk->_blocks[x][y][z].setMass(0.0);
-					chunk->_blocks[x][y][z].setNewMass(0.0);
-				}
-				if (x==10 && y==4 && z==6) {
-					chunk->_blocks[x][y][z].setActive(true);
-					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Dirt);
-					chunk->_blocks[x][y][z].setType(BlockType::Solid);
-					chunk->_blocks[x][y][z].setMass(0.0);
-					chunk->_blocks[x][y][z].setNewMass(0.0);
-				}
-				if (x==6 && y==4 && z==7) {
-					chunk->_blocks[x][y][z].setActive(true);
-					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Dirt);
-					chunk->_blocks[x][y][z].setType(BlockType::Solid);
-					chunk->_blocks[x][y][z].setMass(0.0);
-					chunk->_blocks[x][y][z].setNewMass(0.0);
-				}
-				if (x==6 && y==4 && z==8) {
-					chunk->_blocks[x][y][z].setActive(true);
-					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Dirt);
-					chunk->_blocks[x][y][z].setType(BlockType::Solid);
-					chunk->_blocks[x][y][z].setMass(0.0);
-					chunk->_blocks[x][y][z].setNewMass(0.0);
-				}
-				if (x==6 && y==4 && z==9) {
-					chunk->_blocks[x][y][z].setActive(true);
-					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Dirt);
-					chunk->_blocks[x][y][z].setType(BlockType::Solid);
-					chunk->_blocks[x][y][z].setMass(0.0);
-					chunk->_blocks[x][y][z].setNewMass(0.0);
-				}
-				if (x==6 && y==4 && z==10) {
-					chunk->_blocks[x][y][z].setActive(true);
-					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Dirt);
-					chunk->_blocks[x][y][z].setType(BlockType::Solid);
-					chunk->_blocks[x][y][z].setMass(0.0);
-					chunk->_blocks[x][y][z].setNewMass(0.0);
-				}
-				if (x==10 && y==4 && z==6) {
-					chunk->_blocks[x][y][z].setActive(true);
-					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Dirt);
-					chunk->_blocks[x][y][z].setType(BlockType::Solid);
-					chunk->_blocks[x][y][z].setMass(0.0);
-					chunk->_blocks[x][y][z].setNewMass(0.0);
-				}
-				if (x==10 && y==4 && z==7) {
-					chunk->_blocks[x][y][z].setActive(true);
-					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Dirt);
-					chunk->_blocks[x][y][z].setType(BlockType::Solid);
-					chunk->_blocks[x][y][z].setMass(0.0);
-					chunk->_blocks[x][y][z].setNewMass(0.0);
-				}
-				if (x==10 && y==4 && z==8) {
-					chunk->_blocks[x][y][z].setActive(true);
-					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Dirt);
-					chunk->_blocks[x][y][z].setType(BlockType::Solid);
-					chunk->_blocks[x][y][z].setMass(0.0);
-					chunk->_blocks[x][y][z].setNewMass(0.0);
-				}
-				if (x==10 && y==4 && z==9) {
-					chunk->_blocks[x][y][z].setActive(true);
-					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Dirt);
-					chunk->_blocks[x][y][z].setType(BlockType::Solid);
-					chunk->_blocks[x][y][z].setMass(0.0);
-					chunk->_blocks[x][y][z].setNewMass(0.0);
-				}
-				if (x==10 && y==4 && z==10) {
-					chunk->_blocks[x][y][z].setActive(true);
-					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Dirt);
-					chunk->_blocks[x][y][z].setType(BlockType::Solid);
-					chunk->_blocks[x][y][z].setMass(0.0);
-					chunk->_blocks[x][y][z].setNewMass(0.0);
-				}
-				if (x==9 && y==4 && z==10) {
-					chunk->_blocks[x][y][z].setActive(true);
-					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Dirt);
-					chunk->_blocks[x][y][z].setType(BlockType::Solid);
-					chunk->_blocks[x][y][z].setMass(0.0);
-					chunk->_blocks[x][y][z].setNewMass(0.0);
-				}
-				if (x==8 && y==4 && z==10) {
+
+				if (x==8 && y==5 && z==8) {
 					chunk->_blocks[x][y][z].setActive(true);
 					chunk->_blocks[x][y][z].setMaterial(BlockMaterial::Dirt);
 					chunk->_blocks[x][y][z].setType(BlockType::Solid);

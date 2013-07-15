@@ -1,12 +1,15 @@
 #include "Chunk.h"
+#include "ChunkManager.h"
 
-const float	Chunk::MaxSpeed = 1.0;
-const float	Chunk::MaxMass = 1.0;
-const float	Chunk::MinMass = 0.1;
+class ChunkManager;
+
+const float	Chunk::MaxSpeed = 1.0f;
+const float	Chunk::MaxMass = 1.0f;
+const float	Chunk::MinMass = 0.1f;
 const float Chunk::MaxCompress = 0.001f;
-const float	Chunk::MinFlow = 0.0001;
+const float	Chunk::MinFlow = 0.001f;
 
-Chunk::Chunk(Program* program, glm::vec3 position) : _vbo(0), _vao(0), _wvbo(0), _wvao(0), _position(position), _loaded(false), _generated(false),
+Chunk::Chunk(Program* program, glm::vec3 position, ChunkManager* chunkManager) : _vbo(0), _vao(0), _wvbo(0), _wvao(0), _position(position), _loaded(false), _generated(false),
 				 _chunkTotalSize(CHUNK_SIZE*CHUNK_SIZE*CHUNK_SIZE*CHUNK_SIZE),	//Amount of blocks in a chunk
 				 _renderBlockSize(6*2*3),										//6 faces * 2 triangles per face * 3 points for each triangle
 				 _renderSize(0),												//All the block triangles that are going to be rendered
@@ -29,6 +32,8 @@ Chunk::Chunk(Program* program, glm::vec3 position) : _vbo(0), _vao(0), _wvbo(0),
 	}
 
 	start = std::chrono::steady_clock::now();
+
+	_chunkManager = chunkManager;
 	
 	glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);
@@ -68,6 +73,8 @@ void Chunk::buildChunk() {
 				if (!tmpBlock->isActive()) {
 					continue;
 				}
+
+				_chunkManager->getChunkGivenWorldPosition(0,0,0);
 
 				bool negX = false;
 				if(x > 0) {
@@ -116,7 +123,8 @@ void Chunk::buildChunk() {
 		}
 	}
 
-	glBufferData(GL_ARRAY_BUFFER, vertexDataSize, vertexData, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertexDataSize, NULL, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, vertexDataSize, vertexData);
 	glEnableVertexAttribArray(_program->attrib("vert"));
     glVertexAttribPointer(_program->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 9*sizeof(GLfloat), NULL);
     glEnableVertexAttribArray(_program->attrib("vertColor"));
@@ -142,7 +150,7 @@ void Chunk::buildWater() {
 	int currentBlockVertexDataSize = 0;
 	int vertexDataCurrentPosition = 0;
 	
-	std::vector<Block*>::iterator iterator;
+	std::list<Block*>::iterator iterator;
     for(iterator = _waterList.begin(); iterator != _waterList.end(); iterator++) {
 		Block* block = *iterator;
 		
@@ -310,10 +318,10 @@ void Chunk::updateWater() {
 					_blocks[x][y][z].setType(BlockType::Liquid);
 					_blocks[x][y][z].setMaterial(BlockMaterial::Water);
 					_blocks[x][y][z].setActive(true);
-					_waterList.push_back(&_blocks[x][y][z]);
-					
-					std::sort(_waterList.begin(), _waterList.end());
-					_waterList.erase(std::unique(_waterList.begin(), _waterList.end()), _waterList.end());
+
+					_waterList.insert(_waterList.end(), &_blocks[x][y][z]);
+					_waterList.sort();
+					_waterList.unique();
 				}
 
 				_blocks[x][y][z].setMass(_blocks[x][y][z].getNewMass());
@@ -330,6 +338,8 @@ void Chunk::updateWater() {
 		}
 	}
 
+	std::cout << flow << std::endl;
+
 	buildWater();
 }
 
@@ -340,8 +350,7 @@ void Chunk::update() {
 
 	if ((nseconds*-1) > 0.05) {
 		start = std::chrono::steady_clock::now();
-		updateWater();
-		std::cout << _waterList.size() << "-";
+		//updateWater();
 	}
 }
 
@@ -352,9 +361,9 @@ void Chunk::render() {
 		glDrawArrays(GL_TRIANGLES, 0, _renderSize);
     glBindVertexArray(0);
 
-    glBindVertexArray(_wvao);
-		glDrawArrays(GL_TRIANGLES, 0, _renderWaterSize);
-    glBindVertexArray(0);
+  //  glBindVertexArray(_wvao);
+		//glDrawArrays(GL_TRIANGLES, 0, _renderWaterSize);
+  //  glBindVertexArray(0);
 }
 
 float Chunk::getStableState(float totalMass) {

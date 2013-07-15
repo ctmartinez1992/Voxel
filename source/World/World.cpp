@@ -18,10 +18,10 @@ World::~World() {
 }
 
 void World::generateWorld(Program* program) {	
-	for (int x(0); x!=1; ++x) {
+	for (int x(0); x!=3; ++x) {
 		for (int y(0); y!=1; ++y) {
-			for (int z(0); z!=1; ++z) {
-				_chunkManager->pushChunk(new Chunk(program, glm::vec3(x, y, z)));
+			for (int z(0); z!=3; ++z) {
+				_chunkManager->pushChunk(new Chunk(program, glm::vec3(x, y, z), _chunkManager));
 			}
 		}
 	}
