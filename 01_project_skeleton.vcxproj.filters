@@ -1,0 +1,142 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="source">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>
+      </Extensions>
+    </Filter>
+    <Filter Include="OGLRender">
+      <UniqueIdentifier>{45ae3bdc-499b-4bad-8e59-cbe99bc7bb71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{c4690e0b-18da-4be8-b356-5351a56559d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\Block">
+      <UniqueIdentifier>{696c8d72-a623-4ad7-80d5-a645814e2745}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\Chunk">
+      <UniqueIdentifier>{d0a5d7b4-7aca-4bad-a63d-0f6e632eeb10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\PlayerFPS">
+      <UniqueIdentifier>{89f80fbd-48bd-47dc-9b7c-de0202149850}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\IO">
+      <UniqueIdentifier>{8e1903ed-8d61-4bfa-8b7e-6c191f824816}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\World">
+      <UniqueIdentifier>{b726c449-ab68-4546-b8f1-1144534f66c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\Util">
+      <UniqueIdentifier>{3c39487d-eaac-40e2-943f-a42a75616a1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\UtilGL">
+      <UniqueIdentifier>{96ff8e03-9cc3-4ef0-9980-df412d5b36b7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\vertex-shader.txt">
+      <Filter>resources</Filter>
+    </None>
+    <None Include="resources\fragment-shader.txt">
+      <Filter>resources</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\main.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="OGLRender\Program.cpp">
+      <Filter>OGLRender</Filter>
+    </ClCompile>
+    <ClCompile Include="OGLRender\Shader.cpp">
+      <Filter>OGLRender</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Block\Block.cpp">
+      <Filter>source\Block</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Chunk\Chunk.cpp">
+      <Filter>source\Chunk</Filter>
+    </ClCompile>
+    <ClCompile Include="source\PlayerFPS\Camera.cpp">
+      <Filter>source\PlayerFPS</Filter>
+    </ClCompile>
+    <ClCompile Include="source\PlayerFPS\Player.cpp">
+      <Filter>source\PlayerFPS</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IO\InputHandler.cpp">
+      <Filter>source\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="source\World\World.cpp">
+      <Filter>source\World</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UtilGL\Bitmap.cpp">
+      <Filter>source\UtilGL</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UtilGL\PerlinNoise.cpp">
+      <Filter>source\UtilGL</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UtilGL\Texture.cpp">
+      <Filter>source\UtilGL</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Util\FPS.cpp">
+      <Filter>source\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Util\MyMath.cpp">
+      <Filter>source\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Chunk\ChunkGenerator.cpp">
+      <Filter>source\Chunk</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Chunk\ChunkManager.cpp">
+      <Filter>source\Chunk</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="OGLRender\Program.h">
+      <Filter>OGLRender</Filter>
+    </ClInclude>
+    <ClInclude Include="OGLRender\Shader.h">
+      <Filter>OGLRender</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Block\Block.h">
+      <Filter>source\Block</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Chunk\Chunk.h">
+      <Filter>source\Chunk</Filter>
+    </ClInclude>
+    <ClInclude Include="source\PlayerFPS\Camera.h">
+      <Filter>source\PlayerFPS</Filter>
+    </ClInclude>
+    <ClInclude Include="source\PlayerFPS\Player.h">
+      <Filter>source\PlayerFPS</Filter>
+    </ClInclude>
+    <ClInclude Include="source\IO\InputHandler.h">
+      <Filter>source\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="source\World\World.h">
+      <Filter>source\World</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UtilGL\Bitmap.h">
+      <Filter>source\UtilGL</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UtilGL\PerlinNoise.h">
+      <Filter>source\UtilGL</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UtilGL\Texture.h">
+      <Filter>source\UtilGL</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Util\FPS.h">
+      <Filter>source\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Util\MyMath.h">
+      <Filter>source\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Chunk\ChunkGenerator.h">
+      <Filter>source\Chunk</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Chunk\ChunkManager.h">
+      <Filter>source\Chunk</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

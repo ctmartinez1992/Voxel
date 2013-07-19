@@ -16,7 +16,7 @@ private:
 	Program(const Program&);
 
 	//Copying disabled.
-	const Program& operator=(const Program&);
+	const Program& operator =(const Program&);
 
 
 public:
